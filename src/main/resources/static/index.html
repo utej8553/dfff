@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>🌐 Simple C Compiler</title>
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<header>
+    <h1>🌐 Simple C Compiler</h1>
+    <div class="actions">
+        <button id="connectBtn">Connect/Refresh 🔌</button>
+        <button id="runBtn" disabled>Compile & Run ▶</button>
+        <button id="stopBtn" disabled>Stop Process 🛑</button>
+        <span id="sessionStatus" class="status-msg status-err">Disconnected.</span>
+    </div>
+</header>
+
+<main>
+    <section class="editor">
+        <h3>Code Editor (main.c)</h3>
+        <textarea id="codeArea" spellcheck="false" placeholder="// Write your C code here...
+#include <stdio.h>
+int main(void){
+    printf(\"Enter a number: \");
+        fflush(stdout); // Crucial for interactive I/O
+        int x;
+        if (scanf(\"%d\", &x) == 1) {
+        printf(\"You entered: %d\\n\", x);
+        }
+        return 0;
+        }"></textarea>
+    </section>
+
+    <section class="output">
+        <h3>Build/Compilation Log</h3>
+        <pre id="outputBox" class="log">Press 'Connect' to start the session...</pre>
+
+        <h3>Program Output & Interactive Input</h3>
+        <pre id="programOutput" class="log output-stream">Waiting for connection...</pre>
+
+        <div class="input-area">
+            <label for="terminalInput">Input (for scanf/cin):</label>
+            <input type="text" id="terminalInput" disabled placeholder="Type input here and press Enter">
+        </div>
+    </section>
+</main>
+
+<footer>
+    <small>Backend Endpoint: <code id="backendUrl">/terminal</code></small>
+</footer>
+
+<script src="script.js?v=20251105"></script>
+</body>
+</html>
