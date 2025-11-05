@@ -8,14 +8,14 @@ const connectBtn = document.getElementById('connectBtn');
 const runBtn = document.getElementById('runBtn');
 const stopBtn = document.getElementById('stopBtn');
 const codeArea = document.getElementById('codeArea');
-const outputBox = document.getElementById('outputBox'); // Build Log
-const programOutput = document.getElementById('programOutput'); // Program Output
-const terminalInput = document.getElementById('terminalInput'); // Input Box
+const outputBox = document.getElementById('outputBox'); 
+const programOutput = document.getElementById('programOutput'); 
+const terminalInput = document.getElementById('terminalInput'); 
 const sessionStatus = document.getElementById('sessionStatus');
-// We no longer use backendUrl = document.getElementById('backendUrl').textContent;
+// We no longer read the hardcoded 'backendUrl' from the DOM.
 
 // --- DYNAMIC URL FIX (CRITICAL) ---
-// 1. Get the current hostname (e.g., 3.91.9.8) from the browser's address bar.
+// 1. Get the hostname (e.g., 3.91.9.8) from the current browser URL.
 const host = window.location.host.split(':')[0]; 
 const port = 8080; // Hardcoded Spring Boot port
 
@@ -31,33 +31,29 @@ let ws = null;
 let isProcessRunning = false;
 let isConnected = false;
 
-// --- UTILITIES ---
+// --- UTILITIES (omitted for brevity, assume correct) ---
 function updateButtons(connect, run, stop) {
     connectBtn.disabled = !connect;
     runBtn.disabled = !run || !isConnected;
     stopBtn.disabled = !stop;
-    terminalInput.disabled = !stop; // Input is enabled only when a process is running
+    terminalInput.disabled = !stop; 
 }
-
 function updateStatus(status, className, text) {
     sessionStatus.textContent = text;
     sessionStatus.className = `status-msg ${className}`;
 }
-
 function appendProgramOutput(data) {
-    // Basic ANSI color support for streamed output
     const ansiRegex = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqr-uy=><]/g;
     let html = data.replace(ansiRegex, (match) => {
-        // Simple placeholder for ANSI sequences (full support requires a library)
-        if (match.includes('31')) return '<span style="color:var(--err)">'; // Red
-        if (match.includes('32')) return '<span style="color:var(--ok)">';  // Green
-        if (match.includes('0m')) return '</span>'; // Reset
+        if (match.includes('31')) return '<span style="color:var(--err)">'; 
+        if (match.includes('32')) return '<span style="color:var(--ok)">';  
+        if (match.includes('0m')) return '</span>'; 
         return '';
     });
-
     programOutput.innerHTML += html;
     programOutput.scrollTop = programOutput.scrollHeight;
 }
+
 
 // --- WEBSOCKET CONNECTION AND HANDLERS ---
 function connectSession() {
@@ -97,11 +93,9 @@ function connectSession() {
                 outputBox.textContent += content + '\n';
                 break;
             case 'OUTPUT':
-                // Real-time output stream from the running program
                 appendProgramOutput(content);
                 break;
             case 'END':
-                // Process finished or was killed
                 isProcessRunning = false;
                 updateStatus('status-ok', 'Connected (Idle)', 'Connected (Idle)');
                 updateButtons(true, true, false);
@@ -151,11 +145,9 @@ runBtn.onclick = () => {
 
 stopBtn.onclick = () => {
     if (ws && ws.readyState === WebSocket.OPEN && isProcessRunning) {
-        // Send a kill command (we'll rely on the backend detecting the session close/force-kill)
         ws.close();
         updateStatus('status-err', 'Stopping...', 'Stopping...');
         updateButtons(false, false, false);
-        // Reconnect immediately
         setTimeout(connectSession, 500);
     }
 };
@@ -166,8 +158,8 @@ terminalInput.addEventListener('keydown', (e) => {
         if (ws && ws.readyState === WebSocket.OPEN && isProcessRunning) {
             const input = terminalInput.value;
             ws.send("INPUT:" + input);
-            appendProgramOutput(`\n[Input Sent: ${input}]\n`); // Show user what they sent
-            terminalInput.value = ''; // Clear the input field
+            appendProgramOutput(`\n[Input Sent: ${input}]\n`); 
+            terminalInput.value = ''; 
         } else {
             outputBox.textContent += '\n[System] Cannot send input. No active program running.';
         }
@@ -176,6 +168,5 @@ terminalInput.addEventListener('keydown', (e) => {
 
 // --- INITIALIZATION ---
 window.onload = () => {
-    // Note: The main application (OnlineCompilerApplication.java) must be running first.
     updateButtons(true, false, false);
 };
