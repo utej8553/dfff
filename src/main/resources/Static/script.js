@@ -12,7 +12,19 @@ const outputBox = document.getElementById('outputBox'); // Build Log
 const programOutput = document.getElementById('programOutput'); // Program Output
 const terminalInput = document.getElementById('terminalInput'); // Input Box
 const sessionStatus = document.getElementById('sessionStatus');
-const backendUrl = document.getElementById('backendUrl').textContent;
+// We no longer use backendUrl = document.getElementById('backendUrl').textContent;
+
+// --- DYNAMIC URL FIX (CRITICAL) ---
+// 1. Get the current hostname (e.g., 3.91.9.8) from the browser's address bar.
+const host = window.location.host.split(':')[0]; 
+const port = 8080; // Hardcoded Spring Boot port
+
+// 2. Determine protocol (ws for http, wss for https)
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+// 3. Construct the final, dynamic WebSocket URL
+const DYNAMIC_BACKEND_URL = `${wsProtocol}//${host}:${port}/terminal`;
+// ------------------------------------
 
 // --- STATE VARIABLES ---
 let ws = null;
@@ -56,7 +68,8 @@ function connectSession() {
     programOutput.textContent = 'Attempting connection...';
 
     try {
-        ws = new WebSocket(backendUrl);
+        // --- USE THE DYNAMICALLY CONSTRUCTED URL HERE ---
+        ws = new WebSocket(DYNAMIC_BACKEND_URL);
     } catch (e) {
         outputBox.textContent += `\nERROR: Invalid WebSocket URL: ${e.message}`;
         return;
