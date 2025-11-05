@@ -28,7 +28,6 @@ public class CompilerWebSocketHandler extends TextWebSocketHandler {
             executorService.submit(() -> executeCode(session, code));
         } else if (payload.startsWith("INPUT:")) {
             String input = payload.substring(6);
-            // Add newline for console input processing by C/C++ runtime
             sendInputToProcess(session, input + "\n");
         }
     }
@@ -49,7 +48,6 @@ public class CompilerWebSocketHandler extends TextWebSocketHandler {
             File outputFile = new File(sessionId + ".out");
             try (PrintWriter writer = new PrintWriter(sourceFile)) { writer.print(code); }
 
-            // 2. Compile
             synchronized (session) { session.sendMessage(new TextMessage("BUILD_LOG: Compiling...\n")); }
             ProcessBuilder compileBuilder = new ProcessBuilder("gcc", sourceFile.getName(), "-o", outputFile.getName());
             compileBuilder.directory(sourceFile.getParentFile());
@@ -75,7 +73,6 @@ public class CompilerWebSocketHandler extends TextWebSocketHandler {
                 return;
             }
 
-            // 3. Execute
             synchronized (session) {
                 session.sendMessage(new TextMessage("BUILD_LOG: Compilation successful. Running...\n"));
             }
@@ -85,14 +82,12 @@ public class CompilerWebSocketHandler extends TextWebSocketHandler {
 
             runningProcesses.put(sessionId, runProcess);
 
-            // 4. Stream real-time output
             StreamGobbler outputGobbler = new StreamGobbler(runProcess.getInputStream(), session, "OUTPUT:");
             StreamGobbler errorGobbler = new StreamGobbler(runProcess.getErrorStream(), session, "OUTPUT: [Error] ");
 
             outputFuture = executorService.submit(outputGobbler);
             errorFuture = executorService.submit(errorGobbler);
 
-            // 5. Enforce a timeout
             if (!runProcess.waitFor(EXECUTION_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                 runProcess.destroyForcibly();
                 outputFuture.cancel(true);
@@ -126,8 +121,6 @@ public class CompilerWebSocketHandler extends TextWebSocketHandler {
             }
         }
     }
-
-    // --- Utility Methods ---
     private void sendInputToProcess(WebSocketSession session, String input) throws IOException {
         Process process = runningProcesses.get(session.getId());
         if (process != null && process.isAlive()) {
@@ -181,7 +174,8 @@ public class CompilerWebSocketHandler extends TextWebSocketHandler {
                         }
                     } else { break; }
                 }
-            } catch (IOException e) { /* ignored */ }
+            } catch (IOException e) {  }
         }
     }
+
 }
