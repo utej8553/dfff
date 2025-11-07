@@ -15,15 +15,18 @@ const sessionStatus = document.getElementById('sessionStatus');
 // Removed: const backendUrl = document.getElementById('backendUrl').textContent;
 
 // --- DYNAMIC URL FIX (CRITICAL) ---
+// --- DYNAMIC URL FIX (CRITICAL) ---
 // This calculates the host IP/DNS name from the browser's address bar.
 const host = window.location.host.split(':')[0];
-const port = 8080; // Hardcoded Spring Boot port
-
+// const port = 8080; // <--- DELETE OR COMMENT OUT THIS LINE
+const port = window.location.port ? `:${window.location.port}` : ''; // Use the existing port (80/443) or nothing
 // Determine protocol (ws for http, wss for https)
 const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
 // Construct the final, dynamic WebSocket URL
-const DYNAMIC_BACKEND_URL = `${wsProtocol}//${host}:${port}/terminal`;
+// DYNAMIC_BACKEND_URL will be ws://54.197.69.203/terminal
+const DYNAMIC_BACKEND_URL = `${wsProtocol}//${host}${port}/terminal`; 
+// ------------------------------------
 // ------------------------------------
 
 // --- STATE VARIABLES ---
@@ -171,4 +174,5 @@ terminalInput.addEventListener('keydown', (e) => {
 // --- INITIALIZATION ---
 window.onload = () => {
     updateButtons(true, false, false);
+
 };
